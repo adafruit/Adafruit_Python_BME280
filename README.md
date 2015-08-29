@@ -1,7 +1,6 @@
 # Adafruit_Python_BME280
 
-This Python driver allows you to read data from the [Adafruit BME280 Breakout](https://www.adafruit.com/products/2652) on a Raspberry Pi or Pi 2 (or similar device)
-.
+This Python driver allows you to read data from the [Adafruit BME280 Breakout](https://www.adafruit.com/products/2652) on a Raspberry Pi, Pi2 or similar device.
 
 ## Requirements
 
