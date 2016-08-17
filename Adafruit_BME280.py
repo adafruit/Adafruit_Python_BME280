@@ -247,3 +247,14 @@ class BME280(object):
             h = 0
         return h
 
+    def read_temperature_f(self):
+        # Wrapper to get temp in F
+        celsius = self.read_temperature()
+        temp = celsius * 1.8 + 32
+        return temp
+
+    def read_pressure_inches(self):
+        # Wrapper to get pressure in inches of Hg
+        pascals = self.read_pressure()
+        inches = pascals * 0.0002953
+        return inches
