@@ -2,7 +2,8 @@
 # Author: Tony DiCola
 #
 # Based on the BMP280 driver with BME280 changes provided by
-# David J Taylor, Edinburgh (www.satsignal.eu)
+# David J Taylor, Edinburgh (www.satsignal.eu). Additional functions added
+# by Tom Nardi (www.digifail.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -258,3 +259,16 @@ class BME280(object):
         pascals = self.read_pressure()
         inches = pascals * 0.0002953
         return inches
+
+    def read_dewpoint(self):
+        # Return calculated dewpoint in C, only accurate at > 50% RH
+        celsius = self.read_temperature()
+        humidity = self.read_humidity()
+        dewpoint = celsius - ((100 - humidity) / 5)
+        return dewpoint
+
+    def read_dewpoint_f(self):
+        # Return calculated dewpoint in F, only accurate at > 50% RH
+        dewpoint_c = self.read_dewpoint()
+        dewpoint_f = dewpoint_c * 1.8 + 32
+        return dewpoint_f
