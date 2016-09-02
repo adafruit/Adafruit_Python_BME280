@@ -126,7 +126,12 @@ class BME280(object):
         if i2c is None:
             import Adafruit_GPIO.I2C as I2C
             i2c = I2C
-        self._device = i2c.get_i2c_device(address, **kwargs)
+        # Create device, catch permission errors
+        try:
+            self._device = i2c.get_i2c_device(address, **kwargs)
+        except IOError:
+            print("Unable to communicate with sensor, check permissions.")
+            exit()
         # Load calibration values.
         self._load_calibration()
         self._device.write8(BME280_REGISTER_CONTROL, 0x24)  # Sleep mode
