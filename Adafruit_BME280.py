@@ -172,40 +172,40 @@ class BME280(object):
         """Gets the compensated temperature in degrees celsius."""
         # float in Python is double precision
         UT = float(self.read_raw_temp())
-        var1 = (UT / 16384.0 - self.dig_T1 / 1024.0) * float(self.dig_T2)
-        var2 = ((UT / 131072.0 - self.dig_T1 / 8192.0) * (
-        UT / 131072.0 - self.dig_T1 / 8192.0)) * float(self.dig_T3)
+        var1 = (UT / 16384.0 - float(self.dig_T1) / 1024.0) * float(self.dig_T2)
+        var2 = ((UT / 131072.0 - float(self.dig_T1) / 8192.0) * (
+        UT / 131072.0 - float(self.dig_T1) / 8192.0)) * float(self.dig_T3)
         self.t_fine = int(var1 + var2)
         temp = (var1 + var2) / 5120.0
         return temp
 
     def read_pressure(self):
         """Gets the compensated pressure in Pascals."""
-        adc = self.read_raw_pressure()
-        var1 = self.t_fine / 2.0 - 64000.0
-        var2 = var1 * var1 * self.dig_P6 / 32768.0
-        var2 = var2 + var1 * self.dig_P5 * 2.0
-        var2 = var2 / 4.0 + self.dig_P4 * 65536.0
+        adc = float(self.read_raw_pressure())
+        var1 = float(self.t_fine) / 2.0 - 64000.0
+        var2 = var1 * var1 * float(self.dig_P6) / 32768.0
+        var2 = var2 + var1 * float(self.dig_P5) * 2.0
+        var2 = var2 / 4.0 + float(self.dig_P4) * 65536.0
         var1 = (
-               self.dig_P3 * var1 * var1 / 524288.0 + self.dig_P2 * var1) / 524288.0
-        var1 = (1.0 + var1 / 32768.0) * self.dig_P1
+               float(self.dig_P3) * var1 * var1 / 524288.0 + float(self.dig_P2) * var1) / 524288.0
+        var1 = (1.0 + var1 / 32768.0) * float(self.dig_P1)
         if var1 == 0:
             return 0
         p = 1048576.0 - adc
         p = ((p - var2 / 4096.0) * 6250.0) / var1
-        var1 = self.dig_P9 * p * p / 2147483648.0
-        var2 = p * self.dig_P8 / 32768.0
-        p = p + (var1 + var2 + self.dig_P7) / 16.0
+        var1 = float(self.dig_P9) * p * p / 2147483648.0
+        var2 = p * float(self.dig_P8) / 32768.0
+        p = p + (var1 + var2 + float(self.dig_P7)) / 16.0
         return p
 
     def read_humidity(self):
-        adc = self.read_raw_humidity()
+        adc = float(self.read_raw_humidity())
         # print 'Raw humidity = {0:d}'.format (adc)
-        h = self.t_fine - 76800.0
-        h = (adc - (self.dig_H4 * 64.0 + self.dig_H5 / 16384.8 * h)) * (
-        self.dig_H2 / 65536.0 * (1.0 + self.dig_H6 / 67108864.0 * h * (
-        1.0 + self.dig_H3 / 67108864.0 * h)))
-        h = h * (1.0 - self.dig_H1 * h / 524288.0)
+        h = float(self.t_fine) - 76800.0
+        h = (adc - (float(self.dig_H4) * 64.0 + float(self.dig_H5) / 16384.8 * h)) * (
+        float(self.dig_H2) / 65536.0 * (1.0 + float(self.dig_H6) / 67108864.0 * h * (
+        1.0 + float(self.dig_H3) / 67108864.0 * h)))
+        h = h * (1.0 - float(self.dig_H1) * h / 524288.0)
         if h > 100:
             h = 100
         elif h < 0:
