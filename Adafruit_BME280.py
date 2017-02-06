@@ -113,11 +113,11 @@ class BME280(object):
         self.dig_H6 = self._device.readS8(BME280_REGISTER_DIG_H7)
 
         h4 = self._device.readS8(BME280_REGISTER_DIG_H4)
-        h4 = (h4 << 24) >> 20
+        h4 = (h4 << 4)
         self.dig_H4 = h4 | (self._device.readU8(BME280_REGISTER_DIG_H5) & 0x0F)
 
         h5 = self._device.readS8(BME280_REGISTER_DIG_H6)
-        h5 = (h5 << 24) >> 20
+        h5 = (h5 << 4)
         self.dig_H5 = h5 | (
         self._device.readU8(BME280_REGISTER_DIG_H5) >> 4 & 0x0F)
 
