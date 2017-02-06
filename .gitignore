@@ -1,0 +1,9 @@
+
+# Ignore editor backup files:
+*~
+*.bak
+
+
+# Ignore compiled Python files:
+*.pyc
+
