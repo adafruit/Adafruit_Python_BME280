@@ -66,9 +66,7 @@ BME280_REGISTER_SOFTRESET = 0xE0
 BME280_REGISTER_CONTROL_HUM = 0xF2
 BME280_REGISTER_CONTROL = 0xF4
 BME280_REGISTER_CONFIG = 0xF5
-BME280_REGISTER_PRESSURE_DATA = 0xF7
-BME280_REGISTER_TEMP_DATA = 0xFA
-BME280_REGISTER_HUMIDITY_DATA = 0xFD
+BME280_REGISTER_DATA = 0xF7
 
 
 class BME280(object):
@@ -135,7 +133,9 @@ class BME280(object):
         '''
 
     def read_raw_temp(self):
-        """Reads the raw (uncompensated) temperature from the sensor."""
+        """Waits for reading to become available on device."""
+        """Does a single burst read of all data values from device."""
+        """Returns the raw (uncompensated) temperature from the sensor."""
         meas = self._mode
         self._device.write8(BME280_REGISTER_CONTROL_HUM, meas)
         meas = self._mode << 5 | self._mode << 2 | 1
@@ -144,28 +144,22 @@ class BME280(object):
         sleep_time = sleep_time + 0.0023 * (1 << self._mode) + 0.000575
         sleep_time = sleep_time + 0.0023 * (1 << self._mode) + 0.000575
         time.sleep(sleep_time)  # Wait the required time
-        msb = self._device.readU8(BME280_REGISTER_TEMP_DATA)
-        lsb = self._device.readU8(BME280_REGISTER_TEMP_DATA + 1)
-        xlsb = self._device.readU8(BME280_REGISTER_TEMP_DATA + 2)
-        raw = ((msb << 16) | (lsb << 8) | xlsb) >> 4
+        self.BME280Data = self._device.readList(BME280_REGISTER_DATA, 8)
+        raw = ((self.BME280Data[3] << 16) | (self.BME280Data[4] << 8) | self.BME280Data[5]) >> 4
         return raw
 
     def read_raw_pressure(self):
-        """Reads the raw (uncompensated) pressure level from the sensor."""
+        """Returns the raw (uncompensated) pressure level from the sensor."""
         """Assumes that the temperature has already been read """
-        """i.e. that enough delay has been provided"""
-        msb = self._device.readU8(BME280_REGISTER_PRESSURE_DATA)
-        lsb = self._device.readU8(BME280_REGISTER_PRESSURE_DATA + 1)
-        xlsb = self._device.readU8(BME280_REGISTER_PRESSURE_DATA + 2)
-        raw = ((msb << 16) | (lsb << 8) | xlsb) >> 4
+        """i.e. that BME280Data[] has been populated."""
+        raw = ((self.BME280Data[0] << 16) | (self.BME280Data[1] << 8) | self.BME280Data[2]) >> 4
         return raw
 
     def read_raw_humidity(self):
+        """Returns the raw (uncompensated) humidity value from the sensor."""
         """Assumes that the temperature has already been read """
-        """i.e. that enough delay has been provided"""
-        msb = self._device.readU8(BME280_REGISTER_HUMIDITY_DATA)
-        lsb = self._device.readU8(BME280_REGISTER_HUMIDITY_DATA + 1)
-        raw = (msb << 8) | lsb
+        """i.e. that BME280Data[] has been populated."""
+        raw = (self.BME280Data[6] << 8) | self.BME280Data[7]
         return raw
 
     def read_temperature(self):
