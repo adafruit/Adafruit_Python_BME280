@@ -35,6 +35,23 @@ BME280_OSAMPLE_4 = 3
 BME280_OSAMPLE_8 = 4
 BME280_OSAMPLE_16 = 5
 
+# Standby Settings
+BME280_STANDBY_0p5 = 0
+BME280_STANDBY_62p5 = 1
+BME280_STANDBY_125 = 2
+BME280_STANDBY_250 = 3
+BME280_STANDBY_500 = 4
+BME280_STANDBY_1000 = 5
+BME280_STANDBY_10 = 6
+BME280_STANDBY_20 = 7
+
+# Filter Settings
+BME280_FILTER_off = 0
+BME280_FILTER_2 = 1
+BME280_FILTER_4 = 2
+BME280_FILTER_8 = 3
+BME280_FILTER_16 = 4
+
 # BME280 Registers
 
 BME280_REGISTER_DIG_T1 = 0x88  # Trimming parameter registers
@@ -70,15 +87,39 @@ BME280_REGISTER_DATA = 0xF7
 
 
 class BME280(object):
-    def __init__(self, mode=BME280_OSAMPLE_1, address=BME280_I2CADDR, i2c=None,
+    def __init__(self, t_mode=BME280_OSAMPLE_1, p_mode=BME280_OSAMPLE_1, h_mode=BME280_OSAMPLE_1,
+                 standby=BME280_STANDBY_250, filter=BME280_FILTER_off, address=BME280_I2CADDR, i2c=None,
                  **kwargs):
         self._logger = logging.getLogger('Adafruit_BMP.BMP085')
-        # Check that mode is valid.
-        if mode not in [BME280_OSAMPLE_1, BME280_OSAMPLE_2, BME280_OSAMPLE_4,
+        # Check that t_mode is valid.
+        if t_mode not in [BME280_OSAMPLE_1, BME280_OSAMPLE_2, BME280_OSAMPLE_4,
                         BME280_OSAMPLE_8, BME280_OSAMPLE_16]:
             raise ValueError(
-                'Unexpected mode value {0}.  Set mode to one of BME280_ULTRALOWPOWER, BME280_STANDARD, BME280_HIGHRES, or BME280_ULTRAHIGHRES'.format(mode))
-        self._mode = mode
+                'Unexpected t_mode value {0}.'.format(t_mode))
+        self._t_mode = t_mode
+        # Check that p_mode is valid.
+        if p_mode not in [BME280_OSAMPLE_1, BME280_OSAMPLE_2, BME280_OSAMPLE_4,
+                        BME280_OSAMPLE_8, BME280_OSAMPLE_16]:
+            raise ValueError(
+                'Unexpected p_mode value {0}.'.format(p_mode))
+        self._p_mode = p_mode
+        # Check that h_mode is valid.
+        if h_mode not in [BME280_OSAMPLE_1, BME280_OSAMPLE_2, BME280_OSAMPLE_4,
+                        BME280_OSAMPLE_8, BME280_OSAMPLE_16]:
+            raise ValueError(
+                'Unexpected h_mode value {0}.'.format(h_mode))
+        self._h_mode = h_mode
+        # Check that standby is valid.
+        if standby not in [BME280_STANDBY_0p5, BME280_STANDBY_62p5, BME280_STANDBY_125, BME280_STANDBY_250,
+                        BME280_STANDBY_500, BME280_STANDBY_1000, BME280_STANDBY_10, BME280_STANDBY_20]:
+            raise ValueError(
+                'Unexpected standby value {0}.'.format(standby))
+        self._standby = standby
+        # Check that filter is valid.
+        if filter not in [BME280_FILTER_off, BME280_FILTER_2, BME280_FILTER_4, BME280_FILTER_8, BME280_FILTER_16]:
+            raise ValueError(
+                'Unexpected filter value {0}.'.format(filter))
+        self._filter = filter
         # Create I2C device.
         if i2c is None:
             import Adafruit_GPIO.I2C as I2C
@@ -87,6 +128,11 @@ class BME280(object):
         # Load calibration values.
         self._load_calibration()
         self._device.write8(BME280_REGISTER_CONTROL, 0x24)  # Sleep mode
+        time.sleep(0.002)
+        self._device.write8(BME280_REGISTER_CONFIG, ((standby << 5) | (filter << 2)))
+        time.sleep(0.002)
+        self._device.write8(BME280_REGISTER_CONTROL_HUM, h_mode)  # Set Humidity Oversample
+        self._device.write8(BME280_REGISTER_CONTROL, ((t_mode << 5) | (p_mode << 2) | 3))  # Set Temp/Pressure Oversample and enter Normal mode
         self.t_fine = 0.0
 
     def _load_calibration(self):
@@ -136,14 +182,6 @@ class BME280(object):
         """Waits for reading to become available on device."""
         """Does a single burst read of all data values from device."""
         """Returns the raw (uncompensated) temperature from the sensor."""
-        meas = self._mode
-        self._device.write8(BME280_REGISTER_CONTROL_HUM, meas)
-        meas = self._mode << 5 | self._mode << 2 | 1
-        self._device.write8(BME280_REGISTER_CONTROL, meas)
-        sleep_time = 0.00125 + 0.0023 * (1 << self._mode)
-        sleep_time = sleep_time + 0.0023 * (1 << self._mode) + 0.000575
-        sleep_time = sleep_time + 0.0023 * (1 << self._mode) + 0.000575
-        time.sleep(sleep_time)  # Wait the required time
         self.BME280Data = self._device.readList(BME280_REGISTER_DATA, 8)
         raw = ((self.BME280Data[3] << 16) | (self.BME280Data[4] << 8) | self.BME280Data[5]) >> 4
         return raw
