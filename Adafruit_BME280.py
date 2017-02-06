@@ -88,7 +88,7 @@ class BME280(object):
         self._device = i2c.get_i2c_device(address, **kwargs)
         # Load calibration values.
         self._load_calibration()
-        self._device.write8(BME280_REGISTER_CONTROL, 0x3F)
+        self._device.write8(BME280_REGISTER_CONTROL, 0x24)  # Sleep mode
         self.t_fine = 0.0
 
     def _load_calibration(self):
