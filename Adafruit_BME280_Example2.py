@@ -2,11 +2,10 @@ from Adafruit_BME280 import *
 import curses
 
 def main(stdscr):
+    sensor = BME280(p_mode=BME280_OSAMPLE_8, t_mode=BME280_OSAMPLE_2, h_mode=BME280_OSAMPLE_1, filter=BME280_FILTER_16)
     stdscr.nodelay(1)
     tstart = time.time()
     while (stdscr.getch() == -1) :
-        sensor = BME280(p_mode=BME280_OSAMPLE_8, t_mode=BME280_OSAMPLE_2, h_mode=BME280_OSAMPLE_1, filter=BME280_FILTER_16)
-
         degrees = sensor.read_temperature()
         pascals = sensor.read_pressure()
         hectopascals = pascals / 100
