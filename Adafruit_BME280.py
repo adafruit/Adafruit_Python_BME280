@@ -2,7 +2,8 @@
 # Author: Tony DiCola
 #
 # Based on the BMP280 driver with BME280 changes provided by
-# David J Taylor, Edinburgh (www.satsignal.eu)
+# David J Taylor, Edinburgh (www.satsignal.eu). Additional functions added
+# by Tom Nardi (www.digifail.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -125,7 +126,12 @@ class BME280(object):
         if i2c is None:
             import Adafruit_GPIO.I2C as I2C
             i2c = I2C
-        self._device = i2c.get_i2c_device(address, **kwargs)
+        # Create device, catch permission errors
+        try:
+            self._device = i2c.get_i2c_device(address, **kwargs)
+        except IOError:
+            print("Unable to communicate with sensor, check permissions.")
+            exit()
         # Load calibration values.
         self._load_calibration()
         self._device.write8(BME280_REGISTER_CONTROL, 0x24)  # Sleep mode
@@ -247,3 +253,27 @@ class BME280(object):
             h = 0
         return h
 
+    def read_temperature_f(self):
+        # Wrapper to get temp in F
+        celsius = self.read_temperature()
+        temp = celsius * 1.8 + 32
+        return temp
+
+    def read_pressure_inches(self):
+        # Wrapper to get pressure in inches of Hg
+        pascals = self.read_pressure()
+        inches = pascals * 0.0002953
+        return inches
+
+    def read_dewpoint(self):
+        # Return calculated dewpoint in C, only accurate at > 50% RH
+        celsius = self.read_temperature()
+        humidity = self.read_humidity()
+        dewpoint = celsius - ((100 - humidity) / 5)
+        return dewpoint
+
+    def read_dewpoint_f(self):
+        # Return calculated dewpoint in F, only accurate at > 50% RH
+        dewpoint_c = self.read_dewpoint()
+        dewpoint_f = dewpoint_c * 1.8 + 32
+        return dewpoint_f
