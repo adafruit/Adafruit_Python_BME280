@@ -1,4 +1,16 @@
-# Adafruit_Python_BME280
+DEPRECATED LIBRARY  Adafruit_Python_BME280
+===================
+
+This library has been deprecated!
+
+we are now only using our circuitpython sensor libraries in python
+
+we are leaving the code up for historical/research purposes but archiving the repository.
+
+check out this guide for using the bme280 with python!
+https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout
+
+#
 
 This Python driver allows you to read data from the [Adafruit BME280 Breakout](https://www.adafruit.com/products/2652) on a Raspberry Pi, Pi2 or similar device.
 
