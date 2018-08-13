@@ -19,8 +19,8 @@ sudo python setup.py install
 
 ## Usage
 
-To read a single set of data points from the BME, connect your Pi or Pi2
-to the BME280 breakout using I2C (connect SCL0/1 to the SCK pin and SCL0/1
+To read a single set of data points from the BME, connect your Pi 
+to the BME280 breakout using I2C (connect SCL to the SCK pin and SDA
 to the SDI pin), and run the following command from this folder:
 
 ```
